@@ -1,0 +1,8 @@
+---
+# vars file for 4500_install_image
+
+compliant_ios_version:
+compliant_ios_bytes:
+compliant_ios_md5:
+compliant_ios_image_name:
+ansible_command_timeout:

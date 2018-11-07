@@ -1,0 +1,40 @@
+---
+# tasks file for 4500-upgrade
+
+
+- name: SHOW VERSION
+  ios_command:
+    commands:
+      - show version
+  register: version
+
+- name: PARSE SHOW VERSION
+  command_parser:
+    file: "parsers/4500_version_parser.yml"
+    content: "{{ version.stdout.0 }}"
+
+- name: RUN DIR
+  ios_command:
+    commands:
+      - dir
+  register: dir
+
+- name: PARSE DIR FILES
+  command_parser:
+    file: "parsers/4500_dir_parser.yml"
+    content: "{{ dir.stdout.0 }}"
+
+- debug: var=dir_facts
+
+- name: FAIL IF NOT ENOUGH SPACE
+  fail:
+    msg: "Not enough space on filesystem"
+  when: "(dir_facts.bytes_free < compliant_ios_bytes) and (item not in dir_facts.files)"
+  with_items: "{{ compliant_ios_image_name }}"
+
+- name: COPY IOS IMAGE
+  when: "(item not in dir_facts.files)"
+  with_items: "{{ compliant_ios_image_name }}"
+  ios_command:
+    commands:
+      - 'copy ftp://cmccarth:cmccarth@10.10.0.1/cat4500e-universalk9.SPA.03.08.05.E.152-4.E5.bin bootflash:cat4500e-universalk9.SPA.03.08.05.E.152-4.E5.bin\n'

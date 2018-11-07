@@ -1,0 +1,93 @@
+---
+# tasks file for 4500_install_image
+
+- name: SHOW VERSION
+  ios_command:
+    commands:
+      - show version
+  register: version
+
+- name: PARSE SHOW VERSION
+  command_parser:
+    file: "parsers/4500_version_parser.yml"
+    content: "{{ version.stdout.0 }}"
+
+- name: RUN DIR
+  ios_command:
+    commands:
+      - dir
+  register: dir
+
+- name: PARSE DIR FILES
+  command_parser:
+    file: "parsers/4500_dir_parser.yml"
+    content: "{{ dir.stdout.0 }}"
+    
+- block:
+
+    - name: CHECK IMAGE MD5
+      ios_command:
+        commands:
+          - 'verify /md5 {{ dir_facts.filesystem }}{{ compliant_ios_image_name }}'
+      register: md5
+
+    - name: PARSE MD5 VALUE
+      command_parser:
+        file: "parsers/4500_md5_parser.yml"
+        content: "{{ md5.stdout.0 }}"
+
+    - name: CHANGE CONFIG REGISTER
+      when: "(system.configuration_register != '0x2102')"
+      ios_config:
+        lines:
+          - 'config-register 0x2102'
+        save_when: modified
+
+    - name: SET BOOT SYSTEM VARIABLE
+      when: md5_facts.md5 == compliant_ios_md5
+      ios_config:
+        lines:
+          - "no boot system"
+          - "boot system flash {{ dir_facts.filesystem }}{{ compliant_ios_image_name }}"
+        save_when: modified
+
+    - name: REBOOT SWITCH
+      ios_command:
+        commands:
+          - "reload\n"
+
+    - name: WAIT FOR SWITCH TO RETURN
+      wait_for:
+        host: "{{inventory_hostname}}"
+        port: 22
+        delay: 60
+        timeout: 600
+      delegate_to: localhost
+      
+  when: system.version != compliant_ios_version
+
+- name: WAIT 2 MINUTES
+  wait_for:
+    host: "{{inventory_hostname}}"
+    port: 22
+    delay: 120
+    timeout: 600
+  delegate_to: localhost
+  
+- name: SHOW VERSION
+  ios_command:
+    commands:
+      - show version
+  register: version
+
+- name: PARSE SHOW VERSION
+  command_parser:
+    file: "parsers/4500_version_parser.yml"
+    content: "{{ version.stdout.0 }}"
+
+- debug: var=system.version  
+
+- name: ASSERT THAT THE IOS VERSION IS CORRECT
+  assert:
+    that:
+      - system.version == compliant_ios_version

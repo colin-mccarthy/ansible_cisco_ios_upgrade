@@ -1,0 +1,11 @@
+---
+
+- name: UPGRADE 4500X FIRMWARE
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+
+  roles:
+    - ansible-network.network-engine
+    - 4500_copy_image
+    - 4500_install_image

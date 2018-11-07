@@ -1,0 +1,9 @@
+---
+# vars file for 4500-upgrade
+
+
+compliant_ios_version: 03.08.05.E
+compliant_ios_bytes: 190492036
+compliant_ios_md5: 2b2fff9a4bf1dc08bbe48c3e9a03d17a
+compliant_ios_image_name: cat4500e-universalk9.SPA.03.08.05.E.152-4.E5.bin
+#ansible_command_timeout: 1200
