@@ -1,0 +1,132 @@
+---
+- name: parser meta data
+  parser_metadata:
+    version: 1.0
+    command: show version
+    network_os: ios
+
+- name: match softare version
+  pattern_match:
+    regex: ', Version (\S+)'
+  register: version
+
+- name: match model
+  pattern_match:
+    regex: '^License Information for .(\S+).'
+  register: model
+  
+- name: match license level
+  pattern_match:
+    regex: 'License Level: (\S+)'
+  register: license
+
+- name: match hostname
+  pattern_match:
+    regex: '^(\S+) uptime'
+  register: hostname
+
+- name: match image path
+  pattern_match:
+    regex: '^System image file is \"(\S+)\"'
+  register: image
+
+- name: match uptime
+  pattern_match:
+    regex: 'uptime is (.*)'
+  register: uptime
+
+- name: match configuration register
+  pattern_match:
+    regex: 'register is (.*)'
+  register: confreg
+  
+- name: match virtual interfaces
+  pattern_match:
+    regex: '^(\d+) Virtual Ethernet'
+  register: virtual_count
+  
+- name: match tengig interfaces
+  pattern_match:
+    regex: '^(\d+) Ten'
+  register: tengig_count
+
+- name: match os
+  pattern_match:
+    regex: 'Cisco IOS Software, (\S+)'
+  register: os
+
+- name: match rom version
+  pattern_match:
+    regex: '^ROM: (\S+)'
+  register: rom
+
+- name: match reload reason
+  pattern_match:
+    regex: '^Last reload reason: (.*)'
+  register: reload
+
+- name: match reload time
+  pattern_match:
+    regex: '^System restarted at (.*)'
+  register: reload_time
+
+- name: match license type
+  pattern_match:
+    regex: '^\s+License.*Type: (.*)'
+  register: lic_type
+
+- name: match physical memory
+  pattern_match:
+    regex: 'with (\S+) bytes of physical memory'
+  register: mem_bytes
+
+- name: match nvram memory
+  pattern_match:
+    regex: '^(\S+) bytes of non-volatile'
+  register: nvram_bytes
+  
+- name: match serial number
+  pattern_match:
+    regex: '^Processor board ID (\S+)'
+  register: serial
+
+- name: build ios system state facts
+  json_template:
+    template:
+      - key: version
+        value: "{{ version.matches.0 }}"
+      - key: hostname
+        value: "{{ hostname.matches.0 }}"
+      - key: image_path
+        value: "{{ image.matches.0 }}"
+      - key: model
+        value: "{{ model.matches.0 }}"
+      - key: uptime
+        value: "{{ uptime.matches.0 }}"
+      - key: configuration_register
+        value: "{{ confreg.matches.0 }}"
+      - key: license
+        value: "{{ license.matches.0 }}"
+      - key: virtual_count
+        value: "{{ virtual_count.matches.0 }}"
+      - key: tengig_count
+        value: "{{ tengig_count.matches.0 }}"
+      - key: os
+        value: "{{ os.matches.0 }}"
+      - key: rom
+        value: "{{ rom.matches.0 }}"
+      - key: reload_reason
+        value: "{{ reload.matches.0 }}"
+      - key: reload_time
+        value: "{{ reload_time.matches.0 }}"
+      - key: lic_type
+        value: "{{ lic_type.matches.0 }}"
+      - key: mem_bytes
+        value: "{{ mem_bytes.matches.0 }}"
+      - key: nvram_bytes
+        value: "{{ nvram_bytes.matches.0 }}"
+      - key: serial
+        value: "{{ serial.matches.0 }}"
+  register: system
+  export: true
+  export_as: dict

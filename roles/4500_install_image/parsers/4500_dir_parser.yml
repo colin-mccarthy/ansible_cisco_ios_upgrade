@@ -1,0 +1,50 @@
+---
+- name: parser meta data
+  parser_metadata:
+    version: 1.0
+    command: dir
+    network_os: ios
+
+- name: match files
+  pattern_match:
+    regex: '\d+\s+-\S+\s+\d+\s+\S+\s\d+\s\d+\s\S+\s+\S+\s+(\S+)'
+    match_all: yes
+  register: files
+  
+- name: match directories
+  pattern_match:
+    regex: '\d+\s+d\S+\s+\d+\s+\S+\s\d+\s\d+\s\S+\s+\S+\s+(\S+)'
+    match_all: yes
+  register: directories
+  
+- name: match bytes total
+  pattern_match:
+    regex: '^(\d+) bytes total'
+  register: bytes_total
+  
+- name: match bytes free
+  pattern_match:
+    regex: '(\d+) bytes free'
+  register: bytes_free
+
+- name: match filesytem
+  pattern_match:
+    regex: '^Directory of (\S+)/'
+  register: filesytem
+
+- name: build filesytem facts
+  json_template:
+    template:
+      - key: filesystem
+        value: "{{ filesytem.matches.0 }}"
+      - key: files
+        value: "{{ files | map(attribute='matches') | list }}"
+      - key: directories
+        value: "{{ directories | map(attribute='matches') | list }}"
+      - key: bytes_total
+        value: "{{ bytes_total.matches.0 }}"
+      - key: bytes_free
+        value: "{{ bytes_free.matches.0 }}"
+  register: dir_facts
+  export: true
+  export_as: dict

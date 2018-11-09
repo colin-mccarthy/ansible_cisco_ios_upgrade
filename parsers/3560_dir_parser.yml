@@ -1,0 +1,30 @@
+---
+
+
+- name: files
+  pattern_match:
+    regex: 'c3560\S*'
+    match_all: yes
+    #content: "{{ item }}"
+  register: files
+  export: yes
+  export_as: list
+
+
+- name: avail meme
+  pattern_match:
+    regex: '\((\S*) bytes free\)'
+  register: meme
+
+
+
+- name: template values
+  register: directory
+  export: yes
+  export_as: dict
+  json_template:
+    template:
+    - key: files
+      value: "{{ files | map(attribute='matches') | list }}"
+    - key: bytes_free
+      value: "{{ meme.matches.0 }}"

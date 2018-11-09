@@ -1,0 +1,20 @@
+---
+- name: parser meta data
+  parser_metadata:
+    version: 1.0
+    command: dir
+    network_os: ios
+
+- name: match md5
+  pattern_match:
+    regex: 'verify /md5 .*= (\S+)'
+  register: md5
+
+- name: build md5 facts
+  json_template:
+    template:
+      - key: md5
+        value: "{{ md5.matches.0 }}"
+  register: md5_facts
+  export: true
+  export_as: dict
