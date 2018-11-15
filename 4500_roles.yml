@@ -2,7 +2,7 @@
 
 - name: UPGRADE 4500X FIRMWARE
   hosts: all
-     connection: network_cli
+  connection: network_cli
   gather_facts: no
 
   roles:
