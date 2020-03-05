@@ -36,7 +36,6 @@ Install Role
 
 ```
 ---------------
-This repo passed all checks using [ansible-lint][7]
 
 
 [1]:https://docs.ansible.com/ansible/latest/modules/ios_command_module.html#ios-command-module
