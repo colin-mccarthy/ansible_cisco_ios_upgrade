@@ -2,8 +2,8 @@
 name: ansible-lint
 on:
   push:
-  schedule:
-    - cron: '0 0 1 * *'
+#  schedule:
+#    - cron: '0 0 1 * *'
 
 jobs:
   lint:
